@@ -74,7 +74,7 @@ class ParameterRefBuilder
 
         $definition = $document->getDefinition();
         $basePath = $this->basePath;
-        $host = $this->host ?: property_exists($definition, 'host') ? $definition->host : $request->getHost();
+        $host = ($this->host ?: property_exists($definition, 'host')) ? $definition->host : $request->getHost();
         $scheme = $this->scheme;
         if (!$scheme) {
             $scheme = $request->getScheme();
