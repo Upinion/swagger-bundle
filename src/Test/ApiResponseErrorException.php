@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -14,21 +14,21 @@ namespace KleijnWeb\SwaggerBundle\Test;
 class ApiResponseErrorException extends \Exception
 {
     /**
-     * @var \stdClass
+     * @var object
      */
     private $data;
 
     /**
      * @var string
      */
-    private $content;
+    private $json;
 
     /**
-     * @param string         $content
-     * @param \stdClass|null $data
-     * @param int            $httpStatusCode
+     * @param string $json
+     * @param object $data
+     * @param int    $httpStatusCode
      */
-    public function __construct(string $content, $data, int $httpStatusCode)
+    public function __construct($json, $data, $httpStatusCode)
     {
         $this->message = "Returned $httpStatusCode";
         if ($data) {
@@ -36,31 +36,26 @@ class ApiResponseErrorException extends \Exception
             if (isset($data->logref)) {
                 $this->message = "$data->message [logref $data->logref]";
             }
-            if (isset($data->errors)) {
-                $this->message .= "\n";
-                foreach ($data->errors as $attribute => $error) {
-                    $this->message .= "[$attribute]: $error\n";
-                }
-            }
+
         }
 
-        $this->code    = $httpStatusCode;
-        $this->data    = $data;
-        $this->content = $content;
+        $this->code = $httpStatusCode;
+        $this->data = $data;
+        $this->json = $json;
     }
 
     /**
      * @return string
      */
-    public function getContent(): string
+    public function getJson()
     {
-        return $this->content;
+        return $this->json;
     }
 
     /**
-     * @return \stdClass
+     * @return object
      */
-    public function getData(): \stdClass
+    public function getData()
     {
         return $this->data;
     }

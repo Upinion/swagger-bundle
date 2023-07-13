@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -8,8 +8,8 @@
 
 namespace KleijnWeb\SwaggerBundle\EventListener;
 
-use KleijnWeb\PhpApi\RoutingBundle\Routing\RequestMeta;
-use KleijnWeb\SwaggerBundle\EventListener\Request\RequestProcessor;
+use KleijnWeb\SwaggerBundle\Document\DocumentRepository;
+use KleijnWeb\SwaggerBundle\Request\RequestProcessor;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 /**
@@ -18,18 +18,23 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 class RequestListener
 {
     /**
+     * @var DocumentRepository
+     */
+    private $documentRepository;
+
+    /**
      * @var RequestProcessor
      */
     private $processor;
 
     /**
-     * RequestListener constructor.
-     *
-     * @param RequestProcessor $processor
+     * @param DocumentRepository $schemaRepository
+     * @param RequestProcessor   $processor
      */
-    public function __construct(RequestProcessor $processor)
+    public function __construct(DocumentRepository $schemaRepository, RequestProcessor $processor)
     {
-        $this->processor = $processor;
+        $this->documentRepository = $schemaRepository;
+        $this->processor          = $processor;
     }
 
     /**
@@ -40,10 +45,33 @@ class RequestListener
         if (!$event->isMasterRequest()) {
             return;
         }
+
         $request = $event->getRequest();
-        if (!$request->attributes->has(RequestMeta::ATTRIBUTE_URI)) {
+
+        if (!$definition = $request->get('_definition')) {
             return;
         }
-        $this->processor->process($request);
+        if (!$swaggerPath = $request->get('_swagger_path')) {
+            throw new \LogicException("Request does not contain reference to Swagger path");
+        }
+
+        $swaggerDocument = $this->documentRepository->get($definition);
+
+        $operation = $swaggerDocument->getOperationObject($swaggerPath, $request->getMethod());
+
+        if (isset($operation->getDefinition()->{'consumes'})) {
+            $types = array_map(function ($type) {
+                return preg_replace('#(.*)/([a-z\.]+\+)?(.*?)#', '$3', $type);
+            }, $operation->getDefinition()->{'consumes'});
+
+            if (!in_array('json', $types)) {
+                return;
+            }
+        }
+
+        $request->attributes->set('_swagger_operation', $operation);
+        $request->attributes->set('_swagger_document', $swaggerDocument);
+
+        $this->processor->process($request, $operation);
     }
 }

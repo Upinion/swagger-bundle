@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -8,7 +8,6 @@
 
 namespace KleijnWeb\SwaggerBundle\DependencyInjection;
 
-use KleijnWeb\PhpApi\Descriptions\Hydrator\DateTimeSerializer;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -29,62 +28,41 @@ class KleijnWebSwaggerExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
 
-        if ($config['handle_exceptions']) {
-            $loader->load('listener_exception.yml');
+        $container->setParameter('swagger.document.base_path', $config['document']['base_path']);
+        $container->setParameter('swagger.serializer.namespace', $config['serializer']['namespace']);
+
+        $serializerType = $config['serializer']['type'];
+        $container->setAlias('swagger.serializer.target', 'swagger.serializer.' . $serializerType);
+
+        if ($serializerType !== 'array') {
+            $resolverDefinition = $container->getDefinition('swagger.request.processor.content_decoder');
+            $resolverDefinition->addArgument(new Reference('swagger.serializer.type_resolver'));
         }
 
-        $container->setParameter('swagger.document.base_path', $config['document']['base_path']);
-        $container->setParameter('phpapi.router_name', 'swagger');
-
-        if (isset($config['document']['cache']) && is_string($config['document']['cache'])) {
-            $resolverDefinition = $container->getDefinition('swagger.description.repository');
+        if (!empty($config['document']['cache'])) {
+            $resolverDefinition = $container->getDefinition('swagger.document.repository');
             $resolverDefinition->addArgument(new Reference($config['document']['cache']));
         }
-        $responseFactory = $container->getDefinition('swagger.response.factory');
 
-        if (isset($config['hydrator'])) {
-            $container
-                ->getDefinition('swagger.hydrator.class_name_resolver')
-                ->replaceArgument(0, $config['hydrator']['namespaces']);
+        $parameterRefBuilderDefinition = $container->getDefinition('swagger.document.parameter_ref_builder');
 
-            $dateTimeSerializerDefinition = $container->getDefinition('swagger.hydrator.class_name_resolver');
-            if (isset($config['hydrator']['date_formats'])) {
-                foreach ($config['hydrator']['date_formats'] as $format) {
-                    $predefinedFormat = DateTimeSerializer::class . "::FORMAT_{$format}";
-                    if (defined($predefinedFormat)) {
-                        $format = constant($predefinedFormat);
-                    }
-                    $dateTimeSerializerDefinition->addArgument(new Reference($format));
-                }
-            }
+        $publicDocsConfig = $config['document']['public'];
+        $arguments        = [$publicDocsConfig['base_url'], $publicDocsConfig['scheme'], $publicDocsConfig['host']];
+        $parameterRefBuilderDefinition->setArguments($arguments);
 
-            $builderDefinition = $container->getDefinition('swagger.hydrator.processor.builder');
-
-            if (isset($config['hydrator']['processors'])) {
-                foreach ($config['hydrator']['processors'] as $processor) {
-                    $builderDefinition->addMethodCall('add', new Reference($processor));
-                }
-            }
-
-            $hydrator   = new Reference('swagger.hydrator');
-            $definition = $container->getDefinition('swagger.request.processor');
-            $definition->addArgument($hydrator);
-            $responseFactory->replaceArgument(0, $hydrator);
+        if (!$config['disable_error_listener']) {
+            $listenerDefinition = $container->getDefinition('kernel.listener.swagger.vnd_error_exception');
+            $listenerDefinition->addTag(
+                'kernel.event_listener',
+                ['event' => 'kernel.exception', 'method' => 'onKernelException']
+            );
         }
-        if ($config['validate_responses']) {
-            $responseFactory->addArgument(new Reference('swagger.request.validator'));
-        }
-        if ($config['ok_status_resolver']) {
-            $responseFactory->addArgument(new Reference($config['ok_status_resolver']));
-        }
-
-        $container->setParameter('swagger.match_unsecured', $config['security']['match_unsecured']);
     }
 
     /**
      * @return string
      */
-    public function getAlias(): string
+    public function getAlias()
     {
         return "swagger";
     }

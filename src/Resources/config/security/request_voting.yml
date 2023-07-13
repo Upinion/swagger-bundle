@@ -1,9 +1,0 @@
-services:
-  swagger.security.listener.request_authorization:
-    class: KleijnWeb\SwaggerBundle\Security\RequestAuthorizationListener
-    arguments: ['@security.authorization_checker' ]
-    public: false
-
-  swagger.security.provider.noop:
-    class: KleijnWeb\SwaggerBundle\Security\NoopProvider
-    public: false

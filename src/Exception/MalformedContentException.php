@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -13,7 +13,7 @@ namespace KleijnWeb\SwaggerBundle\Exception;
  */
 class MalformedContentException extends \Exception
 {
-    public function __construct($message = "", $code = 400, \Throwable $previous = null)
+    public function __construct($message = "", $code = 400, $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -22,46 +22,46 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode    = $treeBuilder->root('swagger');
+        $rootNode = $treeBuilder->root('swagger');
 
         $rootNode
             ->children()
-            ->booleanNode('validate_responses')->defaultFalse()
+                ->booleanNode('disable_error_listener')->defaultFalse()->end()
+                ->arrayNode('serializer')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->enumNode('type')
+                            ->values(array('array', 'jms', 'symfony'))
+                            ->defaultValue('array')
+                            ->cannotBeEmpty()
+                        ->end()
+                        ->arrayNode('namespace')
+                            ->beforeNormalization()
+                                ->ifString()
+                                ->then(function ($v) { return [$v]; })
+                            ->end()
+                            ->prototype('scalar')
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('document')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('cache')->isRequired()->defaultFalse()->end()
+                        ->scalarNode('base_path')->defaultValue('')->end()
+                        ->arrayNode('public')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('scheme')->defaultNull()->end()
+                                ->scalarNode('base_url')->defaultValue('/')->end()
+                                ->scalarNode('host')->defaultNull()->end()
+                            ->end()
+                         ->end()
+                    ->end()
+                ->end()
             ->end()
-            ->scalarNode('ok_status_resolver')->defaultFalse()
-            ->end()
-            ->arrayNode('hydrator')
-            ->children()
-            ->arrayNode('namespaces')->isRequired()
-            ->beforeNormalization()
-            ->ifString()
-            ->then(
-                function ($v) {
-                    return [$v];
-                }
-            )
-            ->end()
-            ->prototype('scalar')
-            ->end()
-            ->end()
-            ->end()
-            ->end()
-            ->arrayNode('document')
-            ->addDefaultsIfNotSet()
-            ->children()
-            ->scalarNode('cache')->cannotBeEmpty()->defaultFalse()->end()
-            ->scalarNode('base_path')->defaultValue('')->end()
-            ->end()
-            ->end()
-            ->arrayNode('security')
-            ->addDefaultsIfNotSet()
-            ->children()
-            ->booleanNode('match_unsecured')->defaultFalse()->end()
-            ->end()
-            ->end()
-            ->booleanNode('handle_exceptions')->defaultTrue()->end()
-            ->end();
-
+            ;
         return $treeBuilder;
     }
 }

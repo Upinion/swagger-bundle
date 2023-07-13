@@ -1,5 +1,0 @@
-services:
-  swagger.security.request_matcher:
-    class: KleijnWeb\SwaggerBundle\Security\RequestMatcher
-    arguments: ['@swagger.description.repository']
-    public: false

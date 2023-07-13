@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the KleijnWeb\SwaggerBundle package.
  *
@@ -8,9 +8,8 @@
 
 namespace KleijnWeb\SwaggerBundle;
 
+use KleijnWeb\SwaggerBundle\DependencyInjection\InjectTestClientCompilerPass;
 use KleijnWeb\SwaggerBundle\DependencyInjection\KleijnWebSwaggerExtension;
-use KleijnWeb\SwaggerBundle\DependencyInjection\SwaggerRequestAuthorizationFactory;
-use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -28,17 +27,6 @@ class KleijnWebSwaggerBundle extends Bundle
         return __NAMESPACE__;
     }
 
-    public function build(ContainerBuilder $container)
-    {
-        parent::build($container);
-
-        if ($container->hasExtension('security')) {
-            /** @var SecurityExtension $extension */
-            $extension = $container->getExtension('security');
-            $extension->addSecurityListenerFactory(new SwaggerRequestAuthorizationFactory());
-        }
-    }
-
     /**
      * @return ExtensionInterface
      */
@@ -49,5 +37,11 @@ class KleijnWebSwaggerBundle extends Bundle
         }
 
         return $this->extension;
+    }
+
+    public function build(ContainerBuilder $container)
+    {
+        parent::build($container);
+        $container->addCompilerPass(new InjectTestClientCompilerPass());
     }
 }
