@@ -11,6 +11,7 @@ namespace KleijnWeb\SwaggerBundle\Tests\EventListener;
 use KleijnWeb\SwaggerBundle\Document\OperationObject;
 use KleijnWeb\SwaggerBundle\EventListener\RequestListener;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
  * @author John Kleijn <john@kleijnweb.nl>
@@ -67,7 +68,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $this->eventMock = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent')
+            ->getMockBuilder(RequestEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -91,7 +92,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->documentMock
@@ -125,7 +126,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(false);
 
         $this->documentMock
@@ -148,7 +149,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
 
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->eventMock
@@ -173,7 +174,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
 
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->eventMock
@@ -191,7 +192,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->documentMock
@@ -230,7 +231,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->documentMock

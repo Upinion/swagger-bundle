@@ -11,7 +11,7 @@ namespace KleijnWeb\SwaggerBundle\Tests\Security;
 use KleijnWeb\SwaggerBundle\Security\RequestAuthorizationListener;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -84,9 +84,9 @@ class RequestAuthorizationListenerTest extends TestCase
         $this->listener->handle($this->createKernelEventWithRequest(new Request()));
     }
 
-    private function createKernelEventWithRequest(Request $request, $isMaster = true): GetResponseEvent
+    private function createKernelEventWithRequest(Request $request, $isMaster = true): RequestEvent
     {
-        $mock = $this->getMockBuilder(GetResponseEvent::class)
+        $mock = $this->getMockBuilder(RequestEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
         $mock
@@ -95,7 +95,7 @@ class RequestAuthorizationListenerTest extends TestCase
             ->willReturn($request);
         $mock
             ->expects($this->any())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn($isMaster);
 
         return $mock;

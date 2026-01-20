@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ExceptionListenerTest extends TestCase
 {
     /**
-     * @var GetResponseForExceptionEvent
+     * @var ExceptionEvent
      */
     private $event;
 
@@ -60,9 +60,9 @@ class ExceptionListenerTest extends TestCase
     protected function setUp()
     {
         $this->event = $this
-            ->getMockBuilder(GetResponseForExceptionEvent::class)
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest', 'setResponse'])
+            ->setMethods(['getThrowable', 'getRequest', 'setResponse'])
             ->getMock();
 
         $this->exception    = new \Exception("Mary had a little lamb");
@@ -75,7 +75,7 @@ class ExceptionListenerTest extends TestCase
 
         $this->event
             ->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn($this->exception);
 
         $this->event
@@ -100,14 +100,14 @@ class ExceptionListenerTest extends TestCase
     public function testWillNotHandleIfNoDocumentUriInAttributesAndNotHttpException()
     {
         $event = $this
-            ->getMockBuilder(GetResponseForExceptionEvent::class)
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest', 'setResponse'])
+            ->setMethods(['getThrowable', 'getRequest', 'setResponse'])
             ->getMock();
 
         $event
             ->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn(new \Exception("Mary had a little lamb"));
 
         $event
@@ -119,21 +119,21 @@ class ExceptionListenerTest extends TestCase
             ->expects($this->never())
             ->method('setResponse');
 
-        /** @var GetResponseForExceptionEvent $event */
+        /** @var ExceptionEvent $event */
         $this->exceptionListener->onKernelException($event);
     }
 
     public function testWillHandleIfNoDocumentUriInAttributesButHttpException()
     {
         $event = $this
-            ->getMockBuilder(GetResponseForExceptionEvent::class)
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest', 'setResponse'])
+            ->setMethods(['getThrowable', 'getRequest', 'setResponse'])
             ->getMock();
 
         $event
             ->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn(new NotFoundHttpException());
 
         $event
@@ -145,7 +145,7 @@ class ExceptionListenerTest extends TestCase
             ->expects($this->once())
             ->method('setResponse');
 
-        /** @var GetResponseForExceptionEvent $event */
+        /** @var ExceptionEvent $event */
         $this->exceptionListener->onKernelException($event);
     }
 

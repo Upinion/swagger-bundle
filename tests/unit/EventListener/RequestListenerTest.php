@@ -14,7 +14,7 @@ use KleijnWeb\SwaggerBundle\EventListener\RequestListener;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
  * @author John Kleijn <john@kleijnweb.nl>
@@ -40,7 +40,7 @@ class RequestListenerTest extends TestCase
     private $eventMock;
 
     /**
-     * @var GetResponseForExceptionEvent
+     * @var RequestEvent
      */
     private $event;
 
@@ -50,7 +50,7 @@ class RequestListenerTest extends TestCase
     protected function setUp()
     {
         $this->eventMock = $this->event = $this
-            ->getMockBuilder(GetResponseForExceptionEvent::class)
+            ->getMockBuilder(RequestEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -70,7 +70,7 @@ class RequestListenerTest extends TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(false);
 
         $this->processorMock
@@ -87,7 +87,7 @@ class RequestListenerTest extends TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $this->eventMock
@@ -111,7 +111,7 @@ class RequestListenerTest extends TestCase
     {
         $this->eventMock
             ->expects($this->once())
-            ->method('isMasterRequest')
+            ->method('isMainRequest')
             ->willReturn(true);
 
         $request = new class extends Request

@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Ramsey\VndError\VndError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -24,7 +24,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class VndErrorExceptionListenerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var GetResponseForExceptionEvent
+     * @var ExceptionEvent
      */
     private $event;
 
@@ -64,9 +64,9 @@ class VndErrorExceptionListenerTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->event = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent')
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest'])
+            ->setMethods(['getThrowable', 'getRequest'])
             ->getMock();
 
         $this->exception = new \Exception("Mary had a little lamb");
@@ -81,7 +81,7 @@ class VndErrorExceptionListenerTest extends \PHPUnit_Framework_TestCase
 
         $this->event
             ->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn($this->exception);
 
         $this->event
@@ -246,13 +246,13 @@ class VndErrorExceptionListenerTest extends \PHPUnit_Framework_TestCase
     public function willReturn404Responses()
     {
         $event = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent')
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest'])
+            ->setMethods(['getThrowable', 'getRequest'])
             ->getMock();
 
         $event->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn(new NotFoundHttpException());
 
         $event->expects($this->any())
@@ -270,15 +270,15 @@ class VndErrorExceptionListenerTest extends \PHPUnit_Framework_TestCase
     public function willCreateValidationErrorResponse()
     {
         $event = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent')
+            ->getMockBuilder(ExceptionEvent::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getException', 'getRequest'])
+            ->setMethods(['getThrowable', 'getRequest'])
             ->getMock();
 
         $exception = new InvalidParametersException('Oh noes', []);
 
         $event->expects($this->any())
-            ->method('getException')
+            ->method('getThrowable')
             ->willReturn($exception);
 
         $event->expects($this->any())
