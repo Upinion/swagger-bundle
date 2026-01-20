@@ -14,7 +14,7 @@ use KleijnWeb\SwaggerBundle\EventListener\ViewListener;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 
 /**
  * @author John Kleijn <john@kleijnweb.nl>
@@ -27,7 +27,7 @@ class ViewListenerTest extends TestCase
     public function willNotHandleIfNoDocumentUriInAttributes()
     {
         $eventMock = $this
-            ->getMockBuilder(GetResponseForControllerResultEvent::class)
+            ->getMockBuilder(ViewEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -54,7 +54,7 @@ class ViewListenerTest extends TestCase
 
         /** @var ResponseFactory $factoryMock */
         $listener = new ViewListener($factoryMock);
-        /** @var GetResponseForControllerResultEvent $eventMock */
+        /** @var ViewEvent $eventMock */
         $listener->onKernelView($eventMock);
     }
 
@@ -69,7 +69,7 @@ class ViewListenerTest extends TestCase
         $result     = [uniqid()];
 
         $eventMock = $this
-            ->getMockBuilder(GetResponseForControllerResultEvent::class)
+            ->getMockBuilder(ViewEvent::class)
             ->disableOriginalConstructor()
             ->getMock();
         $eventMock
@@ -97,7 +97,7 @@ class ViewListenerTest extends TestCase
 
         /** @var ResponseFactory $factoryMock */
         $listener = new ViewListener($factoryMock);
-        /** @var GetResponseForControllerResultEvent $eventMock */
+        /** @var ViewEvent $eventMock */
         $listener->onKernelView($eventMock);
     }
 }

@@ -11,7 +11,7 @@ namespace KleijnWeb\SwaggerBundle\EventListener;
 use KleijnWeb\SwaggerBundle\Response\ResponseFactory;
 use KleijnWeb\SwaggerBundle\Exception\MalformedContentException;
 use KleijnWeb\SwaggerBundle\Exception\UnsupportedContentTypeException;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 
 /**
  * @author John Kleijn <john@kleijnweb.nl>
@@ -32,12 +32,12 @@ class ViewListener
     }
 
     /**
-     * @param GetResponseForControllerResultEvent $event
+     * @param ViewEvent $event
      *
      * @throws MalformedContentException
      * @throws UnsupportedContentTypeException
      */
-    public function onKernelView(GetResponseForControllerResultEvent $event)
+    public function onKernelView(ViewEvent $event)
     {
         $result = $event->getControllerResult();
         $response = $this->responseFactory->createResponse(

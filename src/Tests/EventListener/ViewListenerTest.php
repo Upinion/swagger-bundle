@@ -27,7 +27,7 @@ class ViewListenerTest extends \PHPUnit_Framework_TestCase
         $result = [uniqid()];
 
         $eventMock = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent')
+            ->getMockBuilder('Symfony\Component\HttpKernel\Event\ViewEvent')
             ->disableOriginalConstructor()
             ->getMock();
         $eventMock
